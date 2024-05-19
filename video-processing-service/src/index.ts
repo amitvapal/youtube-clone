@@ -49,10 +49,8 @@ app.post("/process-video",async (req, res) => {
         deleteProcessedVideo(outputFileName)
     ]);
     return res.status(200).send('Video processed successfully.');
-    
-    
-
 });
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`Server started at http://localhost:${port}`);
