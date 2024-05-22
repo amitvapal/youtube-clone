@@ -1,5 +1,6 @@
 import express from "express";
 import ffmpeg from "fluent-ffmpeg";
+import { isVideoNew, setVideo } from "./firestore";
 import { convertVideo, deleteProcessedVideo, deleteRawVideo, downloadRawVideo, setupDirectories, uploadProcessedVideo } from "./storage"; // Import the missing module
 setupDirectories();
 const app = express();
@@ -21,6 +22,18 @@ app.post("/process-video",async (req, res) => {
 
   const inputFileName = data.name;
   const outputFileName = 'processed-' + {inputFileName};
+  const videoId = inputFileName.split('.')[0];
+
+  if(!isVideoNew(videoId)){
+    return res.status(400).send('Video already processed.');
+  }else{
+    await setVideo(videoId, {
+      id: videoId,
+      uid: videoId.split('-')[0],
+      status: 'processing'
+    });
+  }
+
 
   //download the video from the bucket
   await downloadRawVideo(inputFileName)
@@ -42,6 +55,11 @@ app.post("/process-video",async (req, res) => {
 
   //Upload the video to the bucket
     await uploadProcessedVideo(outputFileName);
+
+    await setVideo(videoId, {
+      status: 'processed',
+      filename: outputFileName
+    });
 
     
     await Promise.all([

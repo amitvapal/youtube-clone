@@ -1,15 +1,22 @@
 import styles from "./page.module.css";
+import {getVideos} from './firebase/functions'; // Import the missing module
+import Image from 'next/image';
+import Link from 'next/link';
 
-
-export default function Home() {
+export default async function Home() {
+  const videos = await getVideos(); // Call the getVideos function
+  
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.tsx</code>
-        </p>
-      </div>
+    <main>
+      {
+        videos.map((video) => (
+          <Link href={`/watch?v=${video.filename}`}>
+            <Image src={'/thumbnail.png'} alt='video' width={120} height={80}
+              className={styles.thumbnail}/>
+          </Link>
+        ))
+      }
+      
     </main> // Added closing tag for the main element
   )
 }
